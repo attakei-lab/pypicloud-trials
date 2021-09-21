@@ -23,7 +23,7 @@
             state: "present"
             aws_access_key: "{{ aws.access_key }}"
             aws_secret_key: "{{ aws.secret_key }}"
-            template: "./files/aws/cloudformation-pre.yml"
+            template: "./files/cloudformation-pre.yml"
             template_parameters:
               TableNamespace: "{{ aws.table_prefix }}"
           register: cf_ret
