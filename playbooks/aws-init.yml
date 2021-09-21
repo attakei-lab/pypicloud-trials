@@ -20,3 +20,14 @@
           TableNamespace: "{{ aws.table_prefix }}"
       register: cf
     - debug: var=cf.stack_outputs
+    - name: Build docker-image
+      community.docker.docker_image:
+        build:
+          path: "../docker"
+        name: "{{ cf.stack_outputs.ImageUri }}"
+        source: build
+    - docker_push_ecr:
+        name: "{{ cf.stack_outputs.ImageUri }}"
+        region: "{{ aws.region }}"
+        aws_access_key: "{{ aws.access_key }}"
+        aws_secret_key: "{{ aws.secret_key }}"
