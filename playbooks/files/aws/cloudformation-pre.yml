@@ -1,0 +1,115 @@
+Parameters:
+  TableNamespace:
+    Type: String
+    Default: mypypicloud
+    AllowedPattern: "[a-zA-Z-]+"
+    Description: Prefix of DynamoDB tables for pypicloud
+Resources:
+  AppRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "apprunner.amazonaws.com"
+            Action: "sts:AssumeRole"
+  AppPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "s3:*"
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:aws:s3:::"
+                    - Ref: AppStorage
+              - Fn::Join:
+                  - ""
+                  - - "arn:aws:s3:::"
+                    - Ref: AppStorage
+                    - "/*"
+          - Effect: "Allow"
+            Action:
+              - "dynamodb:CreateTable"
+              - "dynamodb:BatchWriteItem"
+              - "dynamodb:BatchGetItem"
+              - "dynamodb:PutItem"
+              - "dynamodb:DescribeTable"
+              - "dynamodb:Scan"
+              - "dynamodb:Query"
+              - "dynamodb:UpdateItem"
+              - "dynamodb:DeleteTable"
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:aws:dynamodb:*:*:table/"
+                    - Ref: TableNamespace
+                    - "*"
+              - Fn::Join:
+                  - ""
+                  - - "arn:aws:dynamodb:*:*:table/"
+                    - Ref: TableNamespace
+                    - "*/*"
+          - Effect: "Allow"
+            Action:
+              - "dynamodb:ListTables"
+            Resource:
+              - "arn:aws:dynamodb:*:*:table/*"
+      Roles:
+        - Ref: "AppRole"
+  AppStorage:
+    Type: "AWS::S3::Bucket"
+  PackageTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "filename"
+          AttributeType: "S"
+        - AttributeName: "name"
+          AttributeType: "S"
+      GlobalSecondaryIndexes:
+        - IndexName: "name-index"
+          KeySchema:
+            - AttributeName: "name"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+      KeySchema:
+        - AttributeName: "filename"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      TableName:
+        Fn::Join:
+          - ""
+          - - Ref: TableNamespace
+            - "DynamoPackage"
+  PackageSummaryTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "name"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "name"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      TableName:
+        Fn::Join:
+          - ""
+          - - Ref: TableNamespace
+            - "PackageSummary"
+#   Type: "AWS::S3::Bucket"
+  # PackageSummaryTable:
+

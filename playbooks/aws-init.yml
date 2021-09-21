@@ -1,0 +1,20 @@
+# --------------------------------------
+# Playbook for init environment
+# --------------------------------------
+- hosts: localhost
+  tasks:
+    - name: Load config
+      include_vars:
+        file: "../config.yml"
+- hosts: localhost
+  tasks:
+    - name: "Setup stack (pre-requirements)"
+      amazon.aws.cloudformation:
+        stack_name: "{{ aws.stack_name }}"
+        region: "{{ aws.region }}"
+        state: "present"
+        aws_access_key: "{{ aws.access_key }}"
+        aws_secret_key: "{{ aws.secret_key }}"
+        template: "./files/aws/cloudformation-pre.yml"
+        template_parameters:
+          TableNamespace: "{{ aws.table_prefix }}"
