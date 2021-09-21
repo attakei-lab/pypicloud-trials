@@ -6,28 +6,38 @@
     - name: Load config
       include_vars:
         file: "../config.yml"
-- hosts: localhost
-  tasks:
-    - name: "Setup stack (pre-requirements)"
-      amazon.aws.cloudformation:
+    - name: "Gather facts of target CF stack"
+      amazon.aws.cloudformation_info:
         stack_name: "{{ aws.stack_name }}"
         region: "{{ aws.region }}"
-        state: "present"
         aws_access_key: "{{ aws.access_key }}"
         aws_secret_key: "{{ aws.secret_key }}"
-        template: "./files/aws/cloudformation-pre.yml"
-        template_parameters:
-          TableNamespace: "{{ aws.table_prefix }}"
-      register: cf
-    - debug: var=cf.stack_outputs
+      register: cf_ret
+    - set_fact:
+        stack: "{{ cf_ret.cloudformation[aws.stack_name]|default(None) }}"
+    - block:
+        - name: "Setup stack (pre-requirements)"
+          amazon.aws.cloudformation:
+            stack_name: "{{ aws.stack_name }}"
+            region: "{{ aws.region }}"
+            state: "present"
+            aws_access_key: "{{ aws.access_key }}"
+            aws_secret_key: "{{ aws.secret_key }}"
+            template: "./files/aws/cloudformation-pre.yml"
+            template_parameters:
+              TableNamespace: "{{ aws.table_prefix }}"
+          register: cf_ret
+        - set_fact:
+            stack: "{{ cf_ret }}"
+      when: stack == ""
     - name: Build docker-image
       community.docker.docker_image:
         build:
           path: "../docker"
-        name: "{{ cf.stack_outputs.ImageUri }}"
+        name: "{{ stack.stack_outputs.ImageUri }}"
         source: build
     - docker_push_ecr:
-        name: "{{ cf.stack_outputs.ImageUri }}"
+        name: "{{ stack.stack_outputs.ImageUri }}"
         region: "{{ aws.region }}"
         aws_access_key: "{{ aws.access_key }}"
         aws_secret_key: "{{ aws.secret_key }}"
