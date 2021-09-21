@@ -18,3 +18,5 @@
         template: "./files/aws/cloudformation-pre.yml"
         template_parameters:
           TableNamespace: "{{ aws.table_prefix }}"
+      register: cf
+    - debug: var=cf.stack_outputs

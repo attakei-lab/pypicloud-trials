@@ -110,6 +110,11 @@ Resources:
           - ""
           - - Ref: TableNamespace
             - "PackageSummary"
-#   Type: "AWS::S3::Bucket"
-  # PackageSummaryTable:
-
+  AppContainerRepository:
+    Type: "AWS::ECR::Repository"
+Outputs:
+  ImageUri:
+    Value:
+      Fn::GetAtt:
+        - "AppContainerRepository"
+        - "RepositoryUri"
