@@ -5,3 +5,7 @@ RUN pip install \
     pypicloud[server,dynamo,gcs] pypicloud-firestore
 RUN mkdir /app
 WORKDIR /app
+
+# For Minimum demo
+COPY config.ini /app/
+CMD [ "pserve", "config.ini" ]
