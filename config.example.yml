@@ -1,0 +1,11 @@
+---
+# ------------------
+# AWS環境へのセットアップ時の設定
+# ------------------
+aws:
+  region: ap-northeast-1
+  access_key: YOUR-AWS_ACCESS_KEY_ID
+  secret_key: YOUR-AWS_SECRET_ACCESS_KEY
+  stack_name: YOUR-STACK_NAME_FOR_YOUR_ACCOUNT
+  table_prefix: TABLE_PREFIX_FOR_PYPICLOUD
+
