@@ -36,8 +36,19 @@
           path: "../docker"
         name: "{{ stack.stack_outputs.ImageUri }}"
         source: build
+        force_source: yes
     - docker_push_ecr:
         name: "{{ stack.stack_outputs.ImageUri }}"
         region: "{{ aws.region }}"
         aws_access_key: "{{ aws.access_key }}"
         aws_secret_key: "{{ aws.secret_key }}"
+    - name: "Setup stack (all)"
+      amazon.aws.cloudformation:
+        stack_name: "{{ aws.stack_name }}"
+        region: "{{ aws.region }}"
+        state: "present"
+        aws_access_key: "{{ aws.access_key }}"
+        aws_secret_key: "{{ aws.secret_key }}"
+        template: "./files/cloudformation-all.yml"
+        template_parameters:
+          TableNamespace: "{{ aws.table_prefix }}"
