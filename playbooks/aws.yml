@@ -52,3 +52,7 @@
         template: "./files/cloudformation-all.yml"
         template_parameters:
           TableNamespace: "{{ aws.table_prefix }}"
+      register: cf_ret
+    - name: "Print service URL"
+      debug:
+        msg: "Service URL is https://{{ cf_ret.stack_outputs.ServiceUrl }}/"
